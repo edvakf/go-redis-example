@@ -22,6 +22,7 @@ func main() {
 	list()
 	hash()
 	sortedSet()
+	bit()
 }
 
 func flush() {
@@ -142,4 +143,36 @@ func sortedSet() {
 		fmt.Println("key", t)
 		fmt.Println("val", valString)
 	}
+	vals, err = rd.ZRangeByScoreWithScores("baz", redis.ZRangeByScore{Min: "-inf", Max: "+inf", Offset: 0, Count: 2}).Result()
+	if err != nil {
+		panic(err)
+	}
+	for _, val := range vals {
+		t := time.Unix(int64(val.Score), 0)
+		valString, _ := val.Member.(string)
+		fmt.Println("key", t)
+		fmt.Println("val", valString)
+	}
+}
+
+func bit() {
+	err := rd.SetBit("puu", 1, 1).Err()
+	if err != nil {
+		panic(err)
+	}
+	err = rd.SetBit("puu", 10, 1).Err()
+	if err != nil {
+		panic(err)
+	}
+	bit, err := rd.GetBit("puu", 10).Result()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("bit 10: ", bit)
+
+	cnt, err := rd.BitCount("puu", &redis.BitCount{0, 20}).Result()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("bit count: ", cnt)
 }
